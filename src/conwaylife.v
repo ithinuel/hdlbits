@@ -9,65 +9,25 @@ module top_module(
     
     wire [256*4 - 1: 0] neighbours;
     
-    genvar a, b, c;
+    genvar y, x;
     generate
-        for (a = 0; a < 16; a++) begin: outer
-            for (b = 0; b < 16; b++) begin: inner
-                localparam idx = a * 16 + b;
-                if ((a == 0) && (b == 0)) begin
-                    // bottom right
-                    assign neighbours[idx*4 +: 4] =
-                        q[17]  + q[16]  + q[31] +
-                        q[1]   +          q[15] +
-                        q[241] + q[240] + q[255];
-                end else if ((a == 0) && (b == 15)) begin
-                    // bottom left
-                    assign neighbours[idx*4 +: 4] =
-                        q[16]  + q[31]  + q[30] +
-                        q[0]   +          q[14] +
-                        q[240] + q[255] + q[254];
-                end else if ((a == 15) && (b == 0)) begin
-                    // top right
-                    assign neighbours[idx*4 +: 4] =
-                        q[1]   + q[0]    + q[15] +
-                        q[241] +           q[255] +
-                        q[225] + q[224]  + q[239];
-                end else if ((a == 15) && (b == 15)) begin
-                    // top left
-                    assign neighbours[idx*4 +: 4] =
-                        q[0]   + q[15]   + q[14] +
-                        q[240] +           q[254] +
-                        q[224] + q[239]  + q[238];
-                end else if (a == 0) begin
-                    // bottom
-                    assign neighbours[idx*4 +: 4] =
-                        q[idx + line  + 1] + q[idx + line]  + q[idx + line  - 1] +
-                        q[idx + 1]         +                  q[idx         - 1] +
-                        q[15*line + b + 1] + q[15*line + b] + q[15*line + b - 1];
-                end else if (a == 15) begin
-                    // top
-                    assign neighbours[idx*4 +: 4] =
-                        q[b + 1]          + q[b]          + q[b - 1]          +
-                        q[idx + 1]        +                 q[idx        - 1] +
-                        q[idx - line + 1] + q[idx - line] + q[idx - line - 1];
-                end else if (b == 0) begin
-                    // right
-                    assign neighbours[idx*4 +: 4] =
-                        q[idx + line + 1] + q[idx + line] + q[(a+1)*line + line - 1] +
-                        q[idx + 1]        +                 q[a*line     + line - 1] +
-                        q[idx - line + 1] + q[idx - line] + q[(a-1)*line + line - 1];
-                end else if (b == 15) begin
-                    // left
-                    assign neighbours[idx*4 +: 4] =
-                        q[(a+1)*line] + q[idx + line] + q[idx + line - 1] +
-                        q[a*line]     +                 q[idx        - 1] +
-                        q[(a-1)*line] + q[idx - line] + q[idx - line - 1];
-                end else begin 
-                    assign neighbours[idx*4 +: 4] =
-                        q[idx + line + 1] + q[idx + line] + q[idx + line - 1] +
-                        q[idx + 1]        +                 q[idx        - 1] +
-                        q[idx - line + 1] + q[idx - line] + q[idx - line - 1];
-                end
+        for (y = 0; y < 16; y++) begin: outer
+            for (x = 0; x < 16; x++) begin: inner
+                localparam lt = ((y==15)?0:(y+1))*16 + ((x==15)?0:(x+1));
+                localparam l = y*16 + ((x==15)?0:(x+1));
+                localparam lb = ((y==0)?15:(y-1))*16 + ((x==15)?0:(x+1));
+                
+                localparam t = ((y==15)?0:(y+1))*16 + x;
+                localparam c = y*16 + x;
+                localparam b = ((y==0)?15:(y-1))*16 + x;
+                
+                localparam rt = ((y==15)?0:(y+1))*16 + ((x==0)?15:(x-1));
+                localparam r = y*16 + ((x==0)?15:(x-1));
+                localparam rb = ((y==0)?15:(y-1))*16 + ((x==0)?15:(x-1));
+                assign neighbours[c*4 +: 4] =
+                    q[lt] + q[t] + q[rt] +
+                    q[l ]        + q[r ] +
+                    q[lb] + q[b] + q[rb];
             end
         end
     endgenerate
